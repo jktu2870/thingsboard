@@ -132,6 +132,7 @@ export interface WidgetActionSource {
   value: string;
   multiple: boolean;
   hasShowCondition?: boolean;
+  hasDisableCondition?: boolean;
 }
 
 export const widgetActionSources: {[acionSourceId: string]: WidgetActionSource} = {
@@ -579,6 +580,8 @@ export interface WidgetActionDescriptor extends CustomActionDescriptor {
   mobileAction?: WidgetMobileActionDescriptor;
   useShowWidgetActionFunction?: boolean;
   showWidgetActionFunction?: string;
+  useDisableFunction?: boolean;
+  disableFunctionString?: string;
 }
 
 export interface WidgetComparisonSettings {

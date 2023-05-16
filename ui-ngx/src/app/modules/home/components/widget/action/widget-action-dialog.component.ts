@@ -152,9 +152,14 @@ export class WidgetActionDialogComponent extends DialogComponent<WidgetActionDia
       this.fb.control(this.action.useShowWidgetActionFunction, []));
     this.widgetActionFormGroup.addControl('showWidgetActionFunction',
       this.fb.control(this.action.showWidgetActionFunction || 'return true;', []));
+    this.widgetActionFormGroup.addControl('useDisableFunction',
+      this.fb.control(this.action.useDisableFunction, []));
+    this.widgetActionFormGroup.addControl('disableFunctionString',
+      this.fb.control(this.action.disableFunctionString || 'return true;', []));
     this.widgetActionFormGroup.addControl('type',
       this.fb.control(this.action.type, [Validators.required]));
     this.updateShowWidgetActionForm();
+    this.updateDisableWidgetActionForm();
     this.updateActionTypeFormGroup(this.action.type, this.action);
     this.widgetActionFormGroup.get('type').valueChanges.subscribe((type: WidgetActionType) => {
       this.updateActionTypeFormGroup(type);
@@ -162,14 +167,22 @@ export class WidgetActionDialogComponent extends DialogComponent<WidgetActionDia
     this.widgetActionFormGroup.get('actionSourceId').valueChanges.subscribe(() => {
       this.widgetActionFormGroup.get('name').updateValueAndValidity();
       this.updateShowWidgetActionForm();
+      this.updateDisableWidgetActionForm();
     });
     this.widgetActionFormGroup.get('useShowWidgetActionFunction').valueChanges.subscribe(() => {
       this.updateShowWidgetActionForm();
+    });
+    this.widgetActionFormGroup.get('useDisableFunction').valueChanges.subscribe(() => {
+      this.updateDisableWidgetActionForm();
     });
   }
 
   displayShowWidgetActionForm(): boolean {
     return !!this.data.actionsData.actionSources[this.widgetActionFormGroup.get('actionSourceId').value]?.hasShowCondition;
+  }
+
+  displayDisableWidgetActionForm(): boolean {
+    return !!this.data.actionsData.actionSources[this.widgetActionFormGroup.get('actionSourceId').value]?.hasDisableCondition;
   }
 
   getWidgetActionFunctionHelpId(): string | undefined {
@@ -191,6 +204,17 @@ export class WidgetActionDialogComponent extends DialogComponent<WidgetActionDia
       this.widgetActionFormGroup.get('showWidgetActionFunction').clearValidators();
     }
     this.widgetActionFormGroup.get('showWidgetActionFunction').updateValueAndValidity();
+  }
+
+  private updateDisableWidgetActionForm() {
+    const actionSourceId = this.widgetActionFormGroup.get('actionSourceId').value;
+    const useDisableFunction = this.widgetActionFormGroup.get('useDisableFunction').value;
+    if (!!this.data.actionsData.actionSources[actionSourceId]?.hasDisableCondition && useDisableFunction) {
+      this.widgetActionFormGroup.get('disableFunctionString').setValidators([Validators.required]);
+    } else {
+      this.widgetActionFormGroup.get('disableFunctionString').clearValidators();
+    }
+    this.widgetActionFormGroup.get('disableFunctionString').updateValueAndValidity();
   }
 
   private updateActionTypeFormGroup(type?: WidgetActionType, action?: WidgetActionDescriptorInfo) {

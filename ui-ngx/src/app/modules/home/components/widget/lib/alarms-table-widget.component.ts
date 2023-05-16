@@ -78,6 +78,7 @@ import {
   getHeaderTitle,
   noDataMessage,
   prepareTableCellButtonActions,
+  handleTableCellButtonActionsDisabling,
   RowStyleInfo,
   TableCellButtonActionDescriptor,
   TableWidgetDataKeySettings,
@@ -1170,6 +1171,7 @@ class AlarmsDatasource implements DataSource<AlarmDataInfo> {
   private reserveSpaceForHiddenAction = true;
   private cellButtonActions: TableCellButtonActionDescriptor[];
   private readonly usedShowCellActionFunction: boolean;
+  private readonly usedDisableCellActionFunction: boolean;
 
   constructor(private subscription: IWidgetSubscription,
               private dataKeys: Array<DataKey>,
@@ -1178,6 +1180,7 @@ class AlarmsDatasource implements DataSource<AlarmDataInfo> {
               actionCellDescriptors: AlarmWidgetActionDescriptor[]) {
     this.cellButtonActions = actionCellDescriptors.concat(getTableCellButtonActions(widgetContext));
     this.usedShowCellActionFunction = this.cellButtonActions.some(action => action.useShowActionCellButtonFunction);
+    this.usedDisableCellActionFunction = this.cellButtonActions.some(action => action.useDisableFunction);
     if (this.widgetContext.settings.reserveSpaceForHiddenAction) {
       this.reserveSpaceForHiddenAction = coerceBooleanProperty(this.widgetContext.settings.reserveSpaceForHiddenAction);
     }
@@ -1279,6 +1282,9 @@ class AlarmsDatasource implements DataSource<AlarmDataInfo> {
       } else {
         alarm.actionCellButtons = this.cellButtonActions;
         alarm.hasActions = true;
+      }
+      if (this.usedDisableCellActionFunction) {
+        alarm.actionCellButtons = handleTableCellButtonActionsDisabling(alarm.actionCellButtons, this.widgetContext, alarm)
       }
     }
     return alarm;

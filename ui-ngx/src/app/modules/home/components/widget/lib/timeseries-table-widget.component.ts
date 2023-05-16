@@ -70,6 +70,7 @@ import {
   getTableCellButtonActions,
   noDataMessage,
   prepareTableCellButtonActions,
+  handleTableCellButtonActionsDisabling,
   RowStyleInfo,
   TableCellButtonActionDescriptor,
   TableWidgetDataKeySettings,
@@ -701,6 +702,7 @@ class TimeseriesDatasource implements DataSource<TimeseriesRow> {
   private reserveSpaceForHiddenAction = true;
   private cellButtonActions: TableCellButtonActionDescriptor[];
   private readonly usedShowCellActionFunction: boolean;
+  private readonly usedDisableCellActionFunction: boolean;
 
   constructor(
     private source: TimeseriesTableSource,
@@ -711,6 +713,7 @@ class TimeseriesDatasource implements DataSource<TimeseriesRow> {
   ) {
     this.cellButtonActions = getTableCellButtonActions(widgetContext);
     this.usedShowCellActionFunction = this.cellButtonActions.some(action => action.useShowActionCellButtonFunction);
+    this.usedDisableCellActionFunction = this.cellButtonActions.some(action => action.useDisableFunction);
     if (this.widgetContext.settings.reserveSpaceForHiddenAction) {
       this.reserveSpaceForHiddenAction = coerceBooleanProperty(this.widgetContext.settings.reserveSpaceForHiddenAction);
     }
@@ -774,14 +777,20 @@ class TimeseriesDatasource implements DataSource<TimeseriesRow> {
             formattedTs: this.datePipe.transform(timestamp, this.dateFormatFilter)
           };
           if (this.cellButtonActions.length) {
+            let parsedData;
+            if (this.usedShowCellActionFunction || this.usedDisableCellActionFunction) {
+              parsedData = formattedDataFormDatasourceData(data, index);
+            }
             if (this.usedShowCellActionFunction) {
-              const parsedData = formattedDataFormDatasourceData(data, index);
               row.actionCellButtons = prepareTableCellButtonActions(this.widgetContext, this.cellButtonActions,
                 parsedData[0], this.reserveSpaceForHiddenAction);
               row.hasActions = checkHasActions(row.actionCellButtons);
             } else {
               row.hasActions = true;
               row.actionCellButtons = this.cellButtonActions;
+            }
+            if (this.usedDisableCellActionFunction) {
+              row.actionCellButtons = handleTableCellButtonActionsDisabling(row.actionCellButtons, this.widgetContext, parsedData[0])
             }
           }
           row[0] = timestamp;

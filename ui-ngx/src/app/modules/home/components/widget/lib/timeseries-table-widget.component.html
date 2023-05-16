@@ -71,7 +71,8 @@
                     <ng-container *ngFor="let actionDescriptor of row.actionCellButtons; trackBy: trackByActionCellDescriptionId">
                       <span *ngIf="!actionDescriptor.icon" style="width: 40px;"></span>
                       <button *ngIf="actionDescriptor.icon"
-                              mat-icon-button [disabled]="isLoading$ | async"
+                              mat-icon-button
+                              [disabled]="(isLoading$ | async) || actionDescriptor.disabled"
                               matTooltip="{{ actionDescriptor.displayName }}"
                               matTooltipPosition="above"
                               (click)="onActionButtonClick($event, row, actionDescriptor)">
@@ -88,7 +89,7 @@
                     <mat-menu #cellActionsMenu="matMenu" xPosition="before">
                       <ng-container *ngFor="let actionDescriptor of row.actionCellButtons; trackBy: trackByActionCellDescriptionId">
                         <button mat-menu-item *ngIf="actionDescriptor.icon"
-                                [disabled]="isLoading$ | async"
+                                [disabled]="(isLoading$ | async) || actionDescriptor.disabled"
                                 (click)="onActionButtonClick($event, row, actionDescriptor)">
                           <mat-icon>{{actionDescriptor.icon}}</mat-icon>
                           <span>{{ actionDescriptor.displayName }}</span>

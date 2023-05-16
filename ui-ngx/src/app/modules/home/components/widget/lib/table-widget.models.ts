@@ -56,6 +56,9 @@ export type ShowCellButtonActionFunction = (ctx: WidgetContext, data: EntityData
 export interface TableCellButtonActionDescriptor extends  WidgetActionDescriptor {
   useShowActionCellButtonFunction: boolean;
   showActionCellButtonFunction: ShowCellButtonActionFunction;
+  useDisableFunction: boolean;
+  disableFunction: ShowCellButtonActionFunction;
+  disabled?: boolean;
 }
 
 export interface EntityData {
@@ -322,7 +325,19 @@ export function getTableCellButtonActions(widgetContext: WidgetContext): TableCe
         useShowActionCellButtonFunction = false;
       }
     }
-    return {...descriptor, showActionCellButtonFunction, useShowActionCellButtonFunction};
+
+    let useDisableFunction = descriptor.useDisableFunction || false;
+    let disableFunction: ShowCellButtonActionFunction = null;
+    if (useDisableFunction && isNotEmptyStr(descriptor.disableFunctionString)) {
+      try {
+        disableFunction =
+          new Function('widgetContext', 'data', descriptor.disableFunctionString) as ShowCellButtonActionFunction;
+      } catch (e) {
+        useDisableFunction = false;
+        console.warn('disable function failed to be created');
+      }
+    }
+    return {...descriptor, showActionCellButtonFunction, useShowActionCellButtonFunction, disableFunction, useDisableFunction};
   });
 }
 
@@ -352,6 +367,23 @@ function filterTableCellButtonAction(widgetContext: WidgetContext,
   } else {
     return true;
   }
+}
+
+export function handleTableCellButtonActionsDisabling(tableCellButtonActionDescriptors: TableCellButtonActionDescriptor[],
+                                      widgetContext: WidgetContext,
+                                      data: EntityData | AlarmDataInfo | FormattedData): TableCellButtonActionDescriptor[] {
+  return tableCellButtonActionDescriptors.map(action => {
+    if (action.icon && action.useDisableFunction) {
+      try {
+        if (action.disableFunction(widgetContext, data)) {
+          return {id: action.id, icon: action.icon, disabled: true, displayName: action.displayName} as TableCellButtonActionDescriptor;
+        }
+      } catch (e) {
+        console.warn('Failed to execute disableFunction', e);
+      }
+    }
+    return action;
+  })
 }
 
 export function noDataMessage(noDataDisplayMessage: string, defaultMessage: string,

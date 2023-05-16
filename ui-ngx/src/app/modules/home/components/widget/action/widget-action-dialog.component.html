@@ -66,6 +66,22 @@
         [resultType]="'boolean'"
         [editorCompleter]="customActionEditorCompleter"
       ></tb-js-func>
+
+      <section fxLayout="column" *ngIf="displayDisableWidgetActionForm()">
+        <mat-checkbox formControlName="useDisableFunction"
+                      style="padding-bottom: 16px;">
+          {{ 'widget-config.disable-enable-action-using-function' | translate }}
+        </mat-checkbox>
+        <tb-js-func *ngIf="widgetActionFormGroup.get('useDisableFunction').value"
+                    formControlName="disableFunctionString"
+                    [helpId]="getWidgetActionFunctionHelpId()"
+                    [functionArgs]="['widgetContext', 'data']"
+                    [globalVariables]="functionScopeVariables"
+                    [validationArgs]="[]"
+                    [resultType]="'boolean'"
+                    [editorCompleter]="customActionEditorCompleter"
+        ></tb-js-func>
+      </section>
       <mat-form-field class="mat-block">
         <mat-label translate>widget-config.action-type</mat-label>
         <mat-select required formControlName="type">

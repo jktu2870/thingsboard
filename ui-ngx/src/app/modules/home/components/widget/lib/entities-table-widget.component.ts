@@ -84,6 +84,7 @@ import {
   getTableCellButtonActions,
   noDataMessage,
   prepareTableCellButtonActions,
+  handleTableCellButtonActionsDisabling,
   RowStyleInfo,
   TableCellButtonActionDescriptor,
   TableWidgetDataKeySettings,
@@ -755,6 +756,7 @@ class EntityDatasource implements DataSource<EntityData> {
   private reserveSpaceForHiddenAction = true;
   private cellButtonActions: TableCellButtonActionDescriptor[];
   private readonly usedShowCellActionFunction: boolean;
+  private readonly usedDisableCellActionFunction: boolean;
 
   constructor(
        private translate: TranslateService,
@@ -765,6 +767,7 @@ class EntityDatasource implements DataSource<EntityData> {
     ) {
     this.cellButtonActions = getTableCellButtonActions(widgetContext);
     this.usedShowCellActionFunction = this.cellButtonActions.some(action => action.useShowActionCellButtonFunction);
+    this.usedDisableCellActionFunction = this.cellButtonActions.some(action => action.useDisableFunction);
     if (this.widgetContext.settings.reserveSpaceForHiddenAction) {
       this.reserveSpaceForHiddenAction = coerceBooleanProperty(this.widgetContext.settings.reserveSpaceForHiddenAction);
     }
@@ -859,6 +862,9 @@ class EntityDatasource implements DataSource<EntityData> {
       } else {
         entity.actionCellButtons = this.cellButtonActions;
         entity.hasActions = true;
+      }
+      if (this.usedDisableCellActionFunction) {
+        entity.actionCellButtons = handleTableCellButtonActionsDisabling(entity.actionCellButtons, this.widgetContext, entity)
       }
     }
     return entity;
