@@ -53,7 +53,7 @@ export interface TableWidgetDataKeySettings {
 
 export type ShowCellButtonActionFunction = (ctx: WidgetContext, data: EntityData | AlarmDataInfo | FormattedData) => boolean;
 
-export interface TableCellButtonActionDescriptor extends  WidgetActionDescriptor {
+export type TableCellButtonActionDescriptor = WidgetActionDescriptor & {
   useShowActionCellButtonFunction: boolean;
   showActionCellButtonFunction: ShowCellButtonActionFunction;
   useDisableFunction: boolean;
@@ -367,23 +367,6 @@ function filterTableCellButtonAction(widgetContext: WidgetContext,
   } else {
     return true;
   }
-}
-
-export function handleTableCellButtonActionsDisabling(tableCellButtonActionDescriptors: TableCellButtonActionDescriptor[],
-                                      widgetContext: WidgetContext,
-                                      data: EntityData | AlarmDataInfo | FormattedData): TableCellButtonActionDescriptor[] {
-  return tableCellButtonActionDescriptors.map(action => {
-    if (action.icon && action.useDisableFunction) {
-      try {
-        if (action.disableFunction(widgetContext, data)) {
-          return {id: action.id, icon: action.icon, disabled: true, displayName: action.displayName} as TableCellButtonActionDescriptor;
-        }
-      } catch (e) {
-        console.warn('Failed to execute disableFunction', e);
-      }
-    }
-    return action;
-  })
 }
 
 export function noDataMessage(noDataDisplayMessage: string, defaultMessage: string,

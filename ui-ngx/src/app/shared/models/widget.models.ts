@@ -141,7 +141,8 @@ export const widgetActionSources: {[acionSourceId: string]: WidgetActionSource} 
       name: 'widget-action.header-button',
       value: 'headerButton',
       multiple: true,
-      hasShowCondition: true
+      hasShowCondition: true,
+      hasDisableCondition: true
     }
 };
 

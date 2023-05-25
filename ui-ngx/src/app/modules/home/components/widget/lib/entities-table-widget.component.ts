@@ -30,7 +30,7 @@ import {
 import { PageComponent } from '@shared/components/page.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
-import { WidgetAction, WidgetContext } from '@home/models/widget-component.models';
+import { WidgetAction, WidgetContext, handleButtonActionsDisabling } from '@home/models/widget-component.models';
 import {
   DataKey,
   Datasource,
@@ -84,12 +84,12 @@ import {
   getTableCellButtonActions,
   noDataMessage,
   prepareTableCellButtonActions,
-  handleTableCellButtonActionsDisabling,
   RowStyleInfo,
   TableCellButtonActionDescriptor,
   TableWidgetDataKeySettings,
   TableWidgetSettings,
-  widthStyle
+  widthStyle,
+  ShowCellButtonActionFunction
 } from '@home/components/widget/lib/table-widget.models';
 import { ConnectedPosition, Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
@@ -864,7 +864,7 @@ class EntityDatasource implements DataSource<EntityData> {
         entity.hasActions = true;
       }
       if (this.usedDisableCellActionFunction) {
-        entity.actionCellButtons = handleTableCellButtonActionsDisabling(entity.actionCellButtons, this.widgetContext, entity)
+        entity.actionCellButtons = handleButtonActionsDisabling<TableCellButtonActionDescriptor>(entity.actionCellButtons, this.widgetContext, entity)
       }
     }
     return entity;

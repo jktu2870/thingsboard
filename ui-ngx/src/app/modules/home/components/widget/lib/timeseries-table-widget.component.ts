@@ -29,7 +29,7 @@ import {
 import { PageComponent } from '@shared/components/page.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
-import { WidgetAction, WidgetContext } from '@home/models/widget-component.models';
+import { WidgetAction, WidgetContext, handleButtonActionsDisabling } from '@home/models/widget-component.models';
 import {
   DataKey,
   Datasource,
@@ -70,11 +70,11 @@ import {
   getTableCellButtonActions,
   noDataMessage,
   prepareTableCellButtonActions,
-  handleTableCellButtonActionsDisabling,
   RowStyleInfo,
   TableCellButtonActionDescriptor,
   TableWidgetDataKeySettings,
-  TableWidgetSettings
+  TableWidgetSettings,
+  ShowCellButtonActionFunction
 } from '@home/components/widget/lib/table-widget.models';
 import { Overlay } from '@angular/cdk/overlay';
 import { SubscriptionEntityInfo } from '@core/api/widget-api.models';
@@ -790,7 +790,7 @@ class TimeseriesDatasource implements DataSource<TimeseriesRow> {
               row.actionCellButtons = this.cellButtonActions;
             }
             if (this.usedDisableCellActionFunction) {
-              row.actionCellButtons = handleTableCellButtonActionsDisabling(row.actionCellButtons, this.widgetContext, parsedData[0])
+              row.actionCellButtons = handleButtonActionsDisabling<TableCellButtonActionDescriptor>(row.actionCellButtons, this.widgetContext, parsedData[0])
             }
           }
           row[0] = timestamp;

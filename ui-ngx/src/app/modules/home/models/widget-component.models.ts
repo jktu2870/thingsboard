@@ -91,6 +91,8 @@ import { AlarmQuery, AlarmSearchStatus, AlarmStatus} from '@app/shared/models/al
 import { MillisecondsToTimeStringPipe, TelemetrySubscriber } from '@app/shared/public-api';
 import { UserId } from '@shared/models/id/user-id';
 import { UserSettingsService } from '@core/http/user-settings.service';
+import { TableCellButtonActionDescriptor, EntityData, ShowCellButtonActionFunction } from '@home/components/widget/lib/table-widget.models';
+import { AlarmDataInfo } from '@shared/models/alarm.models';
 
 export interface IWidgetAction {
   name: string;
@@ -100,11 +102,14 @@ export interface IWidgetAction {
 
 export type ShowWidgetHeaderActionFunction = (ctx: WidgetContext, data: FormattedData[]) => boolean;
 
-export interface WidgetHeaderAction extends IWidgetAction {
+export type WidgetHeaderAction = IWidgetAction & {
   displayName: string;
   descriptor: WidgetActionDescriptor;
   useShowWidgetHeaderActionFunction: boolean;
   showWidgetHeaderActionFunction: ShowWidgetHeaderActionFunction;
+  useDisableFunction: boolean;
+  disableFunction: ShowWidgetHeaderActionFunction;
+  disabled?: boolean;
 }
 
 export interface WidgetAction extends IWidgetAction {
@@ -616,4 +621,28 @@ export function updateEntityParams(params: StateParams, targetEntityParamName?: 
       targetEntityParams.entityLabel = entityLabel;
     }
   }
+}
+
+type ActionButtonsDisablingConstraint<T> = {
+  icon: string,
+  disableFunction: T extends TableCellButtonActionDescriptor ? ShowCellButtonActionFunction : ShowWidgetHeaderActionFunction,
+  useDisableFunction: boolean
+}
+
+export function handleButtonActionsDisabling<Type extends ActionButtonsDisablingConstraint<Type>>(actionButtons: Array<Type>,
+                                      widgetContext: WidgetContext,
+                                      data: Type extends TableCellButtonActionDescriptor ? (FormattedData | AlarmDataInfo | EntityData) : Array<FormattedData>,
+                                      ): Array<Type> {
+  return actionButtons.map(action => {
+    if (action.icon && action.useDisableFunction) {
+      try {
+        if (action.disableFunction(widgetContext, data)) {
+          return Object.assign({}, action, {disabled: true}) as Type;
+        }
+      } catch (e) {
+        console.warn('Failed to execute disableFunction', e);
+      }
+    }
+    return action;
+  })
 }

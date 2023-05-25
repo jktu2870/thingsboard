@@ -316,13 +316,23 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
     headerActionsDescriptors.forEach((descriptor) =>
     {
       let useShowWidgetHeaderActionFunction = descriptor.useShowWidgetActionFunction || false;
+      let useDisableWidgetHeaderActionFunction = descriptor.useDisableFunction || false;
       let showWidgetHeaderActionFunction: ShowWidgetHeaderActionFunction = null;
+      let disableWidgetHeaderActionFunction: ShowWidgetHeaderActionFunction = null;
       if (useShowWidgetHeaderActionFunction && isNotEmptyStr(descriptor.showWidgetActionFunction)) {
         try {
           showWidgetHeaderActionFunction =
             new Function('widgetContext', 'data', descriptor.showWidgetActionFunction) as ShowWidgetHeaderActionFunction;
         } catch (e) {
           useShowWidgetHeaderActionFunction = false;
+        }
+        if (useDisableWidgetHeaderActionFunction) {
+          try {
+            disableWidgetHeaderActionFunction =
+              new Function('widgetContext', 'data', descriptor.disableFunctionString) as ShowWidgetHeaderActionFunction;
+          } catch (e) {
+            useDisableWidgetHeaderActionFunction = false;
+          }
         }
       }
       const headerAction: WidgetHeaderAction = {
@@ -332,6 +342,8 @@ export class WidgetComponent extends PageComponent implements OnInit, AfterViewI
         descriptor,
         useShowWidgetHeaderActionFunction,
         showWidgetHeaderActionFunction,
+        useDisableFunction: useDisableWidgetHeaderActionFunction,
+        disableFunction: disableWidgetHeaderActionFunction,
         onAction: $event => {
           const entityInfo = this.getActiveEntityInfo();
           const entityId = entityInfo ? entityInfo.entityId : null;

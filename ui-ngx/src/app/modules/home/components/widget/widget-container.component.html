@@ -61,7 +61,9 @@
          fxLayout="row"
          fxLayoutAlign="start center"
          (mousedown)="$event.stopPropagation()">
-      <button mat-icon-button *ngFor="let action of widget.customHeaderActions"
+      <button mat-icon-button
+              *ngFor="let action of widget.customHeaderActions"
+              [disabled]="action.disabled"
               [fxShow]="!isEdit"
               (click)="action.onAction($event)"
               matTooltip="{{ action.displayName }}"

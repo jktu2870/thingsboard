@@ -24,7 +24,14 @@ import {
   widgetType
 } from '@app/shared/models/widget.models';
 import { WidgetLayout, WidgetLayouts } from '@app/shared/models/dashboard.models';
-import { IDashboardWidget, WidgetAction, WidgetContext, WidgetHeaderAction } from './widget-component.models';
+import {
+  IDashboardWidget,
+  WidgetAction,
+  WidgetContext,
+  WidgetHeaderAction,
+  handleButtonActionsDisabling,
+  ShowWidgetHeaderActionFunction
+} from './widget-component.models';
 import { Timewindow } from '@shared/models/time/time.models';
 import { Observable, of, Subject } from 'rxjs';
 import { formattedDataFormDatasourceData, guid, isDefined, isEqual, isUndefined } from '@app/core/utils';
@@ -497,21 +504,32 @@ export class DashboardWidget implements GridsterItem, IDashboardWidget {
 
   updateCustomHeaderActions(detectChanges = false) {
     let customHeaderActions: Array<WidgetHeaderAction>;
+    let data: FormattedData[];
+
     if (this.widgetContext.customHeaderActions) {
-      let data: FormattedData[] = [];
-      if (this.widgetContext.customHeaderActions.some(action => action.useShowWidgetHeaderActionFunction)) {
+      data = [];
+      let useShowWidgetHeaderActionFunction = this.widgetContext.customHeaderActions.some(action => action.useShowWidgetHeaderActionFunction);
+      let useActionDisableFunction = this.widgetContext.customHeaderActions.some(action => action.useDisableFunction);
+      if (useShowWidgetHeaderActionFunction || useActionDisableFunction) {
         data = formattedDataFormDatasourceData(this.widgetContext.data || []);
       }
-      customHeaderActions = this.widgetContext.customHeaderActions.filter(action => this.filterCustomHeaderAction(action, data));
+      if (useShowWidgetHeaderActionFunction) {
+        customHeaderActions = this.widgetContext.customHeaderActions.filter(action => this.filterCustomHeaderAction(action, data));
+      }
+      if (useActionDisableFunction) {
+        customHeaderActions = handleButtonActionsDisabling<WidgetHeaderAction>(customHeaderActions, this.widgetContext, data);
+      }
     } else {
       customHeaderActions = [];
     }
+
     if (!isEqual(this.customHeaderActions, customHeaderActions)) {
       this.customHeaderActions = customHeaderActions;
       if (detectChanges) {
         this.widgetContext.detectContainerChanges();
       }
     }
+
   }
 
   private filterCustomHeaderAction(action: WidgetHeaderAction, data: FormattedData[]): boolean {

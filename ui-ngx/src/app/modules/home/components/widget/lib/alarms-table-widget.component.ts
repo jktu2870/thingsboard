@@ -31,7 +31,7 @@ import {
 import { PageComponent } from '@shared/components/page.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
-import { WidgetAction, WidgetContext } from '@home/models/widget-component.models';
+import { WidgetAction, WidgetContext, handleButtonActionsDisabling } from '@home/models/widget-component.models';
 import { DataKey, WidgetActionDescriptor, WidgetConfig } from '@shared/models/widget.models';
 import { IWidgetSubscription } from '@core/api/widget-api.models';
 import { UtilsService } from '@core/services/utils.service';
@@ -78,12 +78,12 @@ import {
   getHeaderTitle,
   noDataMessage,
   prepareTableCellButtonActions,
-  handleTableCellButtonActionsDisabling,
   RowStyleInfo,
   TableCellButtonActionDescriptor,
   TableWidgetDataKeySettings,
   TableWidgetSettings,
-  widthStyle
+  widthStyle,
+  ShowCellButtonActionFunction
 } from '@home/components/widget/lib/table-widget.models';
 import { ConnectedPosition, Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
@@ -1284,7 +1284,7 @@ class AlarmsDatasource implements DataSource<AlarmDataInfo> {
         alarm.hasActions = true;
       }
       if (this.usedDisableCellActionFunction) {
-        alarm.actionCellButtons = handleTableCellButtonActionsDisabling(alarm.actionCellButtons, this.widgetContext, alarm)
+        alarm.actionCellButtons = handleButtonActionsDisabling<TableCellButtonActionDescriptor>(alarm.actionCellButtons, this.widgetContext, alarm)
       }
     }
     return alarm;
